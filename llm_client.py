@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()  # loads .env vars into the environment
 
 # Create one reusable client; picks up OPENAI_API_KEY from the env
-client = OpenAI()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ---------------------------------------------------------------------------
 
