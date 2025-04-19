@@ -11,6 +11,7 @@ USE_SHEETS = True
 def _init_sheet():
     try:
         credentials_dict = json.loads(st.secrets["google"]["credentials"])
+
         # Fix the private key format
         credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -29,11 +30,13 @@ def log(entry):
         sheet = _init_sheet()
         if sheet:
             try:
-                values = [entry[key] for key in entry]
+                # Ensure all values are safe strings
+                values = [str(entry.get(key, "")) for key in entry]
                 sheet.append_row(values)
             except Exception as e:
                 st.error("Failed to write to Google Sheet")
                 st.exception(e)
+                _log_to_csv(entry)  # fallback
         else:
             st.warning("Falling back to local CSV logging.")
             _log_to_csv(entry)
