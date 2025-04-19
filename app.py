@@ -1,0 +1,304 @@
+# aut-flexibility-app/app.py
+
+import streamlit as st
+import time
+from datetime import datetime
+import random
+
+# --- Required Imports ---
+# These modules are assumed to exist in your project structure
+from timer import start_timer, elapsed # Assumes functions for timing
+from llm_client import map_to_category, evaluate_responses # Assumes functions for LLM interaction
+from feedback_engine import SessionState, PHASES, CATEGORY_LIST # Use components from your feedback_engine.py
+from logger import log # Assumes a logging function
+
+# --- Get Prolific query params ---
+params = st.query_params
+participant = params.get("participant_id", "")
+study_id = params.get("study_id", "")
+# Provide a default Prolific URL for testing, use actual one if present
+default_return_url = "https://app.prolific.com/submissions/complete?cc=YOUR_CODE"
+return_url = params.get("return_url", default_return_url)
+
+
+# -----------------------------------------
+# Every time you need to show / update the list:
+def show_responses(responses, disqualified):
+    if not responses:
+        responses_box.empty()
+        return
+
+    # Split the responses into 3 approximately equal columns
+    col1, col2, col3 = responses_box.columns(3)
+    cols = [col1, col2, col3]
+
+    for i, r in enumerate(responses):
+        col = cols[i % 3]  # round-robin across the columns
+        use_text = r['use_text']
+        if use_text in disqualified:
+            display_text = f"- {use_text} _(disqualified by AI)_"
+        else:
+            display_text = f"- {use_text}"
+
+        col.markdown(display_text)
+
+
+
+# --- Group Assignment ---
+# Assign group based on participant_id once
+if "group_id" not in st.session_state:
+    # Use a simple hash for demonstration if participant ID exists, else random
+    # Ensure hash result is an integer before modulo
+    try:
+        p_hash = int(hash(participant))
+        st.session_state.group_id = p_hash % 4 if participant else random.randint(0, 3)
+    except Exception: # Fallback if hashing fails
+         st.session_state.group_id = random.randint(0, 3)
+
+
+group_id = st.session_state.group_id
+
+# Group assignments determine object order and hint availability
+# Object order: Groups 0, 1 get brick then newspaper; Groups 2, 3 get newspaper then brick
+# Hint availability: Groups 0, 2 have hints enabled during the extension phase (phase 1)
+if group_id in [0, 1]:
+    # First object for phases 0, 1; Second object for phase 2 ('transfer')
+    object_order = ["brick", "newspaper"]
+else:
+    object_order = ["newspaper", "brick"]
+
+# Hint enabled for groups 0 and 2 (controlled within SessionState based on phase)
+hint_enabled_for_group = group_id in [0, 2]
+
+# --- Initialize Session State ---
+if "session" not in st.session_state:
+    # Initialize SessionState from feedback_engine.py
+    # Pass hint availability based on group
+    st.session_state.session = SessionState(objects=object_order, hints=hint_enabled_for_group)
+    st.session_state.started = False
+    # Store responses per phase block - cleared before the last phase
+    st.session_state.responses = []
+    st.session_state.recess_mode = False
+    # Store disqualified responses if using evaluate_responses
+    st.session_state.disqualified = []
+
+session = st.session_state.session
+# Ensure responses list exists in session state
+if "responses" not in st.session_state:
+     st.session_state.responses = []
+# Ensure disqualified list exists
+if "disqualified" not in st.session_state:
+    st.session_state.disqualified = []
+
+
+# --- App Flow ---
+
+if not st.session_state.started:
+    # --- Welcome Screen ---
+    st.title("AUT Flexibility Study")
+    st.write("Welcome! This study involves thinking of creative uses for common objects.")
+    st.write("You will be presented with objects one at a time and asked to list as many different uses as you can within the time limit.")
+    st.write(f"Participant ID: `{participant or 'TEST'}`")
+    st.write(f"Study ID: `{study_id or 'TEST'}`")
+    st.write("Please press Start when you are ready to begin.")
+    if st.button("Start"):
+        st.session_state.started = True
+        session.started = True
+        # session.start_phase() # Start phase 0
+        st.rerun()
+else:
+    # --- Study Phases ---
+
+    # Check if study is complete
+    if session.phase_index >= len(PHASES):
+        st.success("🎉 You have completed the study!")
+        st.balloons()
+        # Provide a clickable link to return to Prolific
+        completion_code = "CXXXXXXXX" # Replace with your actual Prolific completion code
+        prolific_url = f"{return_url}?cc={completion_code}" if return_url != default_return_url else f"https://app.prolific.com/submissions/complete?cc={completion_code}"
+
+        # Use st.link_button for a cleaner button link if Streamlit version supports it
+        # st.link_button("Click here to complete the study on Prolific", prolific_url)
+        # Fallback using markdown HTML for broader compatibility
+        st.markdown(f"""
+        <a href="{prolific_url}" target="_blank">
+            <button style='padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;'>
+                Click here to complete the study on Prolific
+            </button>
+        </a>
+        """, unsafe_allow_html=True)
+        st.markdown(f"Or copy this code: `{completion_code}`")
+        st.stop() # Stop script execution after completion
+
+    # Check for recess mode
+    elif st.session_state.recess_mode:
+        st.header("🧘 Take a short break")
+        st.write("You can rest for 30 seconds. The next phase will start automatically.")
+        countdown = st.empty()
+        recess_duration = 10 # Standard 30 second break
+        for i in range(recess_duration, 0, -1):
+            countdown.markdown(f"⏳ Resuming in **{i}** seconds...")
+            time.sleep(1)
+        st.session_state.recess_mode = False
+        st.rerun()
+
+    # --- Active Phase ---
+    else:
+        # Ensure phase has started if it hasn't (e.g., first run after 'Start' button)
+        if session.phase_start is None:
+             session.start_phase()
+
+        obj = session.current_object # Get object from SessionState property
+        phase_info = session.current_phase # Get phase info from SessionState property
+        duration = phase_info["duration_sec"]
+
+        st.header(f"{phase_info['name'].title()} – Object: {obj.capitalize()}")
+        st.markdown(f"**Participant:** `{participant or 'TEST'}` | **Group:** `{group_id}` | **Phase:** `{session.phase_index + 1}/{len(PHASES)}`")
+
+        timer_placeholder = st.empty()
+        form_placeholder = st.empty() # Placeholder for the form
+
+        with form_placeholder.form(key="use_form", clear_on_submit=True):
+            use = st.text_input("Enter one use:", key=f"use_{session.phase_index}_{session.trial_count}")
+
+            # --- Hint Logic ---
+            # Get hints using the method from feedback_engine.SessionState
+            # This method internally checks if hints are enabled for the group AND if it's the correct phase (index 1)
+            hints = session.get_hint()
+
+            # Display hints if available (will be empty list [] if not applicable)
+            # Hints are automatically hidden in the last phase (index 2) because get_hint only returns them for phase_index 1.
+            if hints:
+                st.markdown("**Hint: You could try a use related to:**")
+                for h in hints:
+                    st.markdown(f"- {h}")
+            # --- End Hint Logic ---
+
+            submitted = st.form_submit_button("Submit use")
+
+        if submitted and use.strip():
+            # Record the use via SessionState method
+            # This method handles timing relative to phase start and calls map_to_category
+            response_record = session.record_use(use)
+
+            # Append full record for potential evaluation and logging
+            full_record = {
+                **response_record, # Includes trial, use_text, category, response_time_sec
+                "phase_index": session.phase_index,
+                "object": obj
+            }
+            st.session_state.responses.append(full_record)
+
+            # --- Optional: Evaluate Responses for Disqualification ---
+            # Call evaluate_responses from llm_client if you need disqualification feedback
+            # This might be computationally expensive to run on every submission
+            # Consider running it less frequently or only at the end of a phase if needed
+            # For now, let's assume it runs and updates session state
+            #eval_result = evaluate_responses(obj, [r['use_text'] for r in responses]) # Pass list of uses
+            eval_result = evaluate_responses(obj, st.session_state.responses)
+
+            st.session_state.disqualified = eval_result.get("disqualified", [])
+            # Note: feedback_engine.SessionState manages used_categories internally for hints
+            # --- End Optional Evaluation ---
+
+            # Log the response
+            log_data = {
+                "timestamp": datetime.utcnow().isoformat(),
+                "participant": participant,
+                "study_id": study_id,
+                "group_id": group_id,
+                "phase_name": phase_info["name"],
+                "phase_index": session.phase_index,
+                "object": obj,
+                "trial": response_record["trial"],
+                "use_text": use,
+                "category": response_record["category"],
+                "response_time_sec_phase": response_record["response_time_sec"], # Time since phase start
+                "hints_enabled_group": hint_enabled_for_group,
+                "shown_hints": hints # Log the hints that were actually shown
+            }
+            log(log_data) # Call your logging function
+
+            st.success("✅ Response recorded.")
+            time.sleep(0.5) # Keep success message visible briefly
+            st.rerun() # Rerun to update timer and clear form
+
+        # --- Display Disqualified/Responses ---
+        last_phase_index = len(PHASES) - 1
+
+
+                
+        # Only show 'Responses so far' if NOT in the last phase
+        disqualified = st.session_state.get("disqualified", [])        
+        if st.session_state.responses:
+            st.subheader("Your recent responses for this object:")
+            # Show limited number of recent responses
+            #for r in st.session_state.responses:
+            #   st.markdown(f"- {r['use_text']}")
+            responses_box = st.empty()
+            show_responses(st.session_state.responses, disqualified)
+        # --- End Display Disqualified/Responses ---
+
+
+        # --- Timer Logic ---
+        if session.phase_start: # Ensure phase has started before calculating time
+             elapsed_time = elapsed(session.phase_start) # Use elapsed from timer module
+             remaining = duration - elapsed_time
+
+             if remaining <= 0:
+                 timer_placeholder.markdown("⏱️ Time remaining: **00:00**")
+                 st.warning("Time's up for this phase!")
+                 time.sleep(1.5) # Pause briefly before moving on
+
+                 # --- Phase Transition ---
+                 next_phase_index = session.phase_index + 1
+                 #st.write("🔍 DEBUG › responses =", responses)  
+                 # Clear responses before starting the *last* phase
+                 if next_phase_index == last_phase_index:
+                     if st.session_state.responses != []:
+                        st.session_state.responses = []
+                        st.session_state.disqualified = [] # Also clear disqualified list
+                        disqualified = st.session_state.get("disqualified", [])   
+                     
+
+                 session.next_phase() # This increments phase_index
+
+                 # Trigger recess between phases 0->1 and 1->2
+                 # Check the index we are *moving to*
+                 if next_phase_index in [1, 2] and next_phase_index < len(PHASES):
+                      st.session_state.recess_mode = True
+
+                 # Start the next phase (timer, etc.) - SessionState needs start_phase called explicitly
+                 if next_phase_index < len(PHASES):
+                      session.start_phase() # Reset timer and trial count for the new phase
+
+                 st.rerun() # Rerun to show recess or next phase/completion screen
+             else:
+                 # Update timer display smoothly using a loop within the script run
+                 # This avoids rerunning the entire script every second
+                 update_interval = 0.5 # How often to update the display (in seconds)
+                 display_secs = -1 # Force initial display update
+
+                 while remaining > 0:
+                     current_secs = int(remaining)
+                     if current_secs != display_secs: # Only update markdown when seconds change
+                          mins, secs = divmod(current_secs, 60)
+                          timer_placeholder.markdown(f"⏱️ Time remaining: **{mins:02d}:{secs:02d}**")
+                          display_secs = current_secs
+
+                     time.sleep(update_interval)
+                     elapsed_time = elapsed(session.phase_start)
+                     remaining = duration - elapsed_time
+
+                     # Check if form was submitted during sleep (Streamlit doesn't easily support this check here)
+                     # A full rerun handles submissions correctly. This loop is just for smooth timer display.
+                     # If precise sub-second accuracy linked to submission is needed, this approach might need adjustment.
+
+                 # Ensure timer shows 00:00 when loop finishes due to time running out
+                 timer_placeholder.markdown("⏱️ Time remaining: **00:00**")
+                 st.rerun() # Rerun to trigger the phase transition logic above
+        else:
+             # Should not happen if start_phase is called correctly, but good failsafe
+             st.warning("Waiting for phase to start...")
+             time.sleep(1)
+             st.rerun()
