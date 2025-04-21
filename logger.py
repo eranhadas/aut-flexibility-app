@@ -23,12 +23,19 @@ VERBOSE = st.sidebar.checkbox("Verbose logging")  # enable live debug
 # --------------------------------------------------------------------
 FIELDNAMES = [
     "timestamp",
-    "participant_id",
+    "participant",
     "study_id",
+    "group_id",
+    "phase_name",
+    "phase_index",
     "object",
-    "response",
-    "rating",
-    "phase",
+    "trial",
+    "use_text",
+    "category",
+    "response_time_sec_phase",
+    "hints_enabled_group",
+    "shown_hints",
+
 ]
 
 # --------------------------------------------------------------------
