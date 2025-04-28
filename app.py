@@ -21,6 +21,27 @@ default_return_url = "https://app.prolific.com/submissions/complete?cc=YOUR_CODE
 return_url = params.get("return_url", default_return_url)
 
 
+def simple_levenshtein(s1, s2):
+    """Compute a simple Levenshtein distance between two strings."""
+    if len(s1) < len(s2):
+        return simple_levenshtein(s2, s1)
+
+    if len(s2) == 0:
+        return len(s1)
+
+    previous_row = list(range(len(s2) + 1))
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+
+    return previous_row[-1]
+
+
 # -----------------------------------------
 # Every time you need to show / update the list:
 def show_responses(responses, disqualified):
@@ -200,40 +221,55 @@ else:
             submitted = st.form_submit_button("Submit use")
 
         if submitted and use.strip():
-            # Record the use via SessionState method
-            # This method handles timing relative to phase start and calls map_to_category
-            response_record = session.record_use(use)
+            standardized_use = use.strip().lower()
 
-            # Append full record for potential evaluation and logging
-            full_record = {
-                **response_record, # Includes trial, use_text, category, response_time_sec
-                "phase_index": session.phase_index,
-                "object": obj
-            }
-            st.session_state.responses.append(full_record)
+            existing_uses = [r["use_text"].strip().lower() for r in st.session_state.responses]
 
+            # Check for exact duplicate
+            if standardized_use in existing_uses:
+                st.warning("⚠️ You already submitted that exact use! Try a different idea.")
+
+            # Check for very close match (distance 1–2)
+            elif any(simple_levenshtein(standardized_use, prev_use) <= 2 for prev_use in existing_uses):
+                st.warning("⚠️ Your idea is very similar to a previous one! Try a more different idea.")
+
+            else:
             
-            # Log the response
-            log_data = {
-                "timestamp": datetime.utcnow().isoformat(),
-                "participant": participant,
-                "study_id": study_id,
-                "group_id": group_id,
-                "phase_name": phase_info["name"],
-                "phase_index": session.phase_index,
-                "object": obj,
-                "trial": response_record["trial"],
-                "use_text": use,
-                "category": response_record["category"],
-                "response_time_sec_phase": response_record["response_time_sec"], # Time since phase start
-                "hints_enabled_group": hint_enabled_for_group,
-                "shown_hints": hints # Log the hints that were actually shown
-            }
-            log(log_data) # Call your logging function
+                # Record the use via SessionState method
+                # This method handles timing relative to phase start and calls map_to_category
+                response_record = session.record_use(use)
 
-            st.success("✅ Response recorded.")
-            time.sleep(0.5) # Keep success message visible briefly
-            st.rerun() # Rerun to update timer and clear form
+                # Append full record for potential evaluation and logging
+                full_record = {
+                    **response_record, # Includes trial, use_text, category, response_time_sec
+                    "phase_index": session.phase_index,
+                    "object": obj
+                }
+                st.session_state.responses.append(full_record)
+
+                
+                # Log the response
+                log_data = {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "participant": participant,
+                    "study_id": study_id,
+                    "group_id": group_id,
+                    "phase_name": phase_info["name"],
+                    "phase_index": session.phase_index,
+                    "object": obj,
+                    "trial": response_record["trial"],
+                    "use_text": use,
+                    "category": response_record["category"],
+                    "response_time_sec_phase": response_record["response_time_sec"], # Time since phase start
+                    "hints_enabled_group": hint_enabled_for_group,
+                    "shown_hints": hints # Log the hints that were actually shown
+                }
+                log(log_data) # Call your logging function
+
+                st.success("✅ Response recorded.")
+                time.sleep(0.5) # Keep success message visible briefly
+                st.rerun() # Rerun to update timer and clear form
+
 
         # --- Display Disqualified/Responses ---
         last_phase_index = len(PHASES) - 1
