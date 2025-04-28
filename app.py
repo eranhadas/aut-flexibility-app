@@ -8,16 +8,16 @@ import random
 # --- Required Imports ---
 # These modules are assumed to exist in your project structure
 from timer import start_timer, elapsed # Assumes functions for timing
-from llm_client import map_to_category, evaluate_responses
+from llm_client import map_to_category, evaluate_responses # Assumes functions for LLM interaction
 from feedback_engine import SessionState, PHASES, CATEGORY_LIST # Use components from your feedback_engine.py
 from logger import log # Assumes a logging function
 
 # --- Get Prolific query params ---
 params = st.query_params
-participant = params.get("PROLIFIC_PID", "")
-study_id = params.get("STUDY_ID", "")
+participant = params.get("participant_id", "")
+study_id = params.get("study_id", "")
 # Provide a default Prolific URL for testing, use actual one if present
-default_return_url = "https://app.prolific.com/submissions/complete"
+default_return_url = "https://app.prolific.com/submissions/complete?cc=YOUR_CODE"
 return_url = params.get("return_url", default_return_url)
 
 
@@ -114,7 +114,7 @@ else:
         st.success("🎉 You have completed the study!")
         st.balloons()
         # Provide a clickable link to return to Prolific
-        completion_code = "C6KNGZWE" # Replace with your actual Prolific completion code
+        completion_code = "CXXXXXXXX" # Replace with your actual Prolific completion code
         prolific_url = f"{return_url}?cc={completion_code}" if return_url != default_return_url else f"https://app.prolific.com/submissions/complete?cc={completion_code}"
 
         # Use st.link_button for a cleaner button link if Streamlit version supports it
@@ -189,18 +189,7 @@ else:
             }
             st.session_state.responses.append(full_record)
 
-            # --- Optional: Evaluate Responses for Disqualification ---
-            # Call evaluate_responses from llm_client if you need disqualification feedback
-            # This might be computationally expensive to run on every submission
-            # Consider running it less frequently or only at the end of a phase if needed
-            # For now, let's assume it runs and updates session state
-            #eval_result = evaluate_responses(obj, [r['use_text'] for r in responses]) # Pass list of uses
-            eval_result = evaluate_responses(obj, st.session_state.responses)
-
-            st.session_state.disqualified = eval_result.get("disqualified", [])
-            # Note: feedback_engine.SessionState manages used_categories internally for hints
-            # --- End Optional Evaluation ---
-
+            
             # Log the response
             log_data = {
                 "timestamp": datetime.utcnow().isoformat(),
@@ -249,6 +238,21 @@ else:
                  timer_placeholder.markdown("⏱️ Time remaining: **00:00**")
                  st.warning("Time's up for this phase!")
                  time.sleep(1.5) # Pause briefly before moving on
+
+                # --- Evaluate at phase end ---
+                 if st.session_state.responses:
+                    eval_result = evaluate_responses(session.current_object, st.session_state.responses)
+
+                    # Mark responses based on final batch disqualification
+                    for r in st.session_state.responses:
+                        if r["use_text"] in eval_result.get("disqualified", []):
+                            r["category"] = "Disqualified"
+
+                    # Store disqualified texts separately for easy UI
+                    st.session_state.disqualified = [r["use_text"] for r in st.session_state.responses if r["category"] == "Disqualified"]
+
+
+
 
                  # --- Phase Transition ---
                  next_phase_index = session.phase_index + 1
@@ -302,5 +306,3 @@ else:
              st.warning("Waiting for phase to start...")
              time.sleep(1)
              st.rerun()
-
-        
