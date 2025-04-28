@@ -25,22 +25,20 @@ return_url = params.get("return_url", default_return_url)
 # Every time you need to show / update the list:
 def show_responses(responses, disqualified):
     if not responses:
-        return  # Don't create anything
+        return
 
-    with st.container():
-        col1, col2, col3 = st.columns(3)
-        cols = [col1, col2, col3]
+    num_cols = min(3, len(responses))
+    cols = st.columns(num_cols)
 
-        for i, r in enumerate(responses):
-            col = cols[i % 3]
-            use_text = r['use_text']
-            if r.get("category") == "Disqualified":
-                display_text = f"- {use_text} _(disqualified by AI)_"
-            else:
-                display_text = f"- {use_text}"
+    for i, r in enumerate(responses):
+        col = cols[i % num_cols]
+        use_text = r['use_text']
+        if r.get("category") == "Disqualified":
+            display_text = f"- {use_text} _(disqualified by AI)_"
+        else:
+            display_text = f"- {use_text}"
 
-            col.markdown(display_text)
-
+        col.markdown(display_text)
 
 
 # --- Group Assignment ---
@@ -147,6 +145,14 @@ else:
         if session.phase_start is None:
              session.start_phase()
 
+        # --- Setup hints only if entering phase 2 and if hints enabled ---
+        if session.phase_index == 1 and hint_enabled_for_group:
+            if "current_hints" not in st.session_state:
+                st.session_state.current_hints = session.get_hint()
+        else:
+            st.session_state.current_hints = []  # No hints outside phase 2
+            
+
         obj = session.current_object # Get object from SessionState property
         phase_info = session.current_phase # Get phase info from SessionState property
         duration = phase_info["duration_sec"]
@@ -165,7 +171,7 @@ else:
             # --- Hint Logic ---
             hint_placeholder = st.empty()  # Create a dynamic placeholder
 
-            hints = session.get_hint()
+            hints = st.session_state.get("current_hints", [])
 
             if hints:
                 with hint_placeholder.container():
@@ -219,11 +225,15 @@ else:
 
 
                 
-        # Only show 'Responses so far' if NOT in the last phase
-        disqualified = st.session_state.get("disqualified", [])        
+        responses_box = st.empty()
+
         if st.session_state.responses:
-            st.subheader("Your responses so far:")
-            show_responses(st.session_state.responses, st.session_state.disqualified)
+            with responses_box.container():
+                st.subheader("Your responses so far:")
+                show_responses(st.session_state.responses, st.session_state.disqualified)
+        else:
+            responses_box.empty()
+
 
 
 
