@@ -161,17 +161,19 @@ else:
         with form_placeholder.form(key="use_form", clear_on_submit=True):
             use = st.text_input("Enter one use:", key=f"use_{session.phase_index}_{session.trial_count}")
 
+            
             # --- Hint Logic ---
-            # Get hints using the method from feedback_engine.SessionState
-            # This method internally checks if hints are enabled for the group AND if it's the correct phase (index 1)
+            hint_placeholder = st.empty()  # Create a dynamic placeholder
+
             hints = session.get_hint()
 
-            # Display hints if available (will be empty list [] if not applicable)
-            # Hints are automatically hidden in the last phase (index 2) because get_hint only returns them for phase_index 1.
             if hints:
-                st.markdown("**Hint: You could try a use related to:**")
-                for h in hints:
-                    st.markdown(f"- {h}")
+                with hint_placeholder.container():
+                    st.markdown("**Hint: You could try a use related to:**")
+                    for h in hints:
+                        st.markdown(f"- {h}")
+            else:
+                hint_placeholder.empty()  # Clear the placeholder if no hints
             # --- End Hint Logic ---
 
             submitted = st.form_submit_button("Submit use")
