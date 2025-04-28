@@ -111,7 +111,7 @@ else:
         st.success("🎉 You have completed the study!")
         st.balloons()
         # Provide a clickable link to return to Prolific
-        completion_code = "CXXXXXXXX" # Replace with your actual Prolific completion code
+        completion_code = "C6KNGZWE" # Replace with your actual Prolific completion code
         prolific_url = f"{return_url}?cc={completion_code}" if return_url != default_return_url else f"https://app.prolific.com/submissions/complete?cc={completion_code}"
 
         # Use st.link_button for a cleaner button link if Streamlit version supports it
