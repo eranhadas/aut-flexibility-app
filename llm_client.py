@@ -15,30 +15,34 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 def map_to_category(use_text: str, object_name: str, cats: str) -> str:
     """Return a single creativity category for one proposed use."""
     prompt = f"""
-        You are a creativity evaluator. Your task is to strictly classify proposed uses of objects.
+    You are a creativity evaluator. Your task is to strictly classify proposed uses of objects.
 
-        Given the object: '{object_name}'
-        Given the proposed use: '{use_text}'
+    Given:
+    - Object: '{object_name}'
+    - Proposed use: '{use_text}'
 
-        Instructions:
-        1. Determine if the proposed use is disqualified. Disqualified means:
-           - Nonsensical or irrelevant to the object
-           - Simply repeating the object name
-           - Not a plausible or possible use
+    Allowed creativity categories for this object are:
+    {cats}
 
-        2. If the use is disqualified, reply with exactly: Disqualified
+    Instructions:
+    1. Determine if the proposed use is disqualified. Disqualified means:
+       - Nonsensical or irrelevant to the object
+       - Simply repeating the object name
+       - Not a plausible or possible use
 
-        3. If the use is legitimate but does not clearly fit any category, reply with exactly: Uncategorized
+    2. If the use is disqualified, reply with exactly: Disqualified
 
-        4. If the use is legitimate and fits a creativity category (such as 'construction', 'art', etc.), reply with exactly the best-fitting category name.
+    3. If the use is legitimate but does not clearly fit any category, reply with exactly: Uncategorized
 
-        Important:
-        - Only reply with a single word or phrase: either 'Disqualified', 'Uncategorized', or a category name.
-        - Do not explain. Do not add any extra words.
-        - The reply must be exact and clean.
+    4. If the use is legitimate and fits a creativity category, choose exactly one best-fitting category from the list above and reply with the category name.
 
-        Now, what is your classification?
-    """
+    Important:
+    - Only reply with a single word or phrase: either 'Disqualified', 'Uncategorized', or one exact category name from the list.
+    - Do not explain. Do not add any extra words.
+    - The reply must be exact and clean.
+
+    Now, what is your classification?
+    """.strip()
 
 
     try:
