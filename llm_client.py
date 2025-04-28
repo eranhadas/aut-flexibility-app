@@ -14,8 +14,18 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def map_to_category(use_text: str, object_name: str, cats: str) -> str:
     """Return a single creativity category for one proposed use."""
-    prompt = (
-        f"Given the object '{object_name}', assign this use: '{use_text}' to the most suitable categories out of these: '{cats}'. Return only the name of the category with no further text. If it's gibberish, or not relevant, or uncategorizable, just return Uncategorized"
+   prompt = f"""
+        Given the object '{object_name}', given this proposed use: '{use_text}'.
+
+
+1. Identify whether it is a disqualified respons – that is:
+   - Nonsensical or irrelevant
+   - Simply repeating the object name
+   - Not a possible use
+
+2. For the legitimate responses, assign it to the most fitting category
+   (e.g., 'construction', 'art', etc.).
+   """
     )
 
     try:
