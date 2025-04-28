@@ -14,8 +14,8 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def map_to_category(use_text: str, object_name: str, cats: str) -> str:
     """Return a single creativity category for one proposed use."""
-   prompt = f"""
-        Given the object '{object_name}', given this proposed use: '{use_text}'.
+    prompt = f"""
+    Given the object '{object_name}', given this proposed use: '{use_text}'.
 
 
     1. Identify whether it is a disqualified respons – that is:
