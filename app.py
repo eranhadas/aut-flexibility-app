@@ -152,6 +152,11 @@ else:
         phase_info = session.current_phase # Get phase info from SessionState property
         duration = phase_info["duration_sec"]
 
+        # --- Clear responses when entering phase 3 ---
+        if session.phase_index == 2 and st.session_state.responses:
+            st.session_state.responses = []
+            st.session_state.disqualified = []
+
         st.header(f"{phase_info['name'].title()} – Object: {obj.capitalize()}")
         st.markdown(f"**Participant:** `{participant or 'TEST'}` | **Group:** `{group_id}` | **Phase:** `{session.phase_index + 1}/{len(PHASES)}`")
 
