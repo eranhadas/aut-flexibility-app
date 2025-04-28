@@ -24,23 +24,26 @@ return_url = params.get("return_url", default_return_url)
 # -----------------------------------------
 # Every time you need to show / update the list:
 def show_responses(responses, disqualified):
+    responses_box = st.empty()  # Create a dynamic placeholder here
+
     if not responses:
-        responses_box.empty()
+        responses_box.empty()  # Clear if no responses
         return
 
-    # Split the responses into 3 approximately equal columns
-    col1, col2, col3 = responses_box.columns(3)
-    cols = [col1, col2, col3]
+    with responses_box.container():
+        # Only create columns if there are responses
+        col1, col2, col3 = st.columns(3)
+        cols = [col1, col2, col3]
 
-    for i, r in enumerate(responses):
-        col = cols[i % 3]  # round-robin across the columns
-        use_text = r['use_text']
-        if r.get("category") == "Disqualified":
-            display_text = f"- {use_text} _(disqualified by AI)_"
-        else:
-            display_text = f"- {use_text}"
+        for i, r in enumerate(responses):
+            col = cols[i % 3]  # round-robin across the columns
+            use_text = r['use_text']
+            if r.get("category") == "Disqualified":
+                display_text = f"- {use_text} _(disqualified by AI)_"
+            else:
+                display_text = f"- {use_text}"
 
-        col.markdown(display_text)
+            col.markdown(display_text)
 
 
 
