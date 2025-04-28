@@ -26,7 +26,8 @@ def map_to_category(use_text: str, object_name: str, cats: str) -> str:
     2. For the legitimate responses, assign it to the most fitting category
        (e.g., 'construction', 'art', etc.).
        
-    In case of disqualified or no category found return just the word "Uncategorized".
+    In case of a disqualified use, return just the word "Disqualified".
+    If no category is found return just the word "Uncategorized".
     Otherwise, return only the category name.
     """
     
