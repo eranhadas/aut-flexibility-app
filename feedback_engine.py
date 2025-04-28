@@ -1,9 +1,9 @@
 from timer import start_timer, elapsed
 
 PHASES = [
-    {"name": "baseline", "duration_sec": 60},
-    {"name": "extension", "duration_sec": 60},
-    {"name": "transfer", "duration_sec": 60},
+    {"name": "First Round: Uses for Object", "duration_sec": 60},
+    {"name": "Keep Going: More Ideas for the Same Object", "duration_sec": 60},
+    {"name": "Final Round: Uses for a Different Object", "duration_sec": 60},
 ]
 
 CATEGORY_LIST = {
