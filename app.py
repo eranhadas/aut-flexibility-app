@@ -259,9 +259,14 @@ else:
              remaining = duration - elapsed_time
 
              if remaining <= 0:
-                 timer_placeholder.markdown("⏱️ Time remaining: **00:00**")
-                 st.warning("Time's up for this phase!")
-                 time.sleep(1.5) # Pause briefly before moving on
+                timer_placeholder.markdown("⏱️ Time remaining: **00:00**")
+
+                times_up_placeholder = st.empty()
+                with times_up_placeholder.container():
+                    st.warning("⏰ Time's up for this phase!")
+                time.sleep(1.5)
+                times_up_placeholder.empty()
+
 
                 # --- Evaluate at phase end ---
                  if st.session_state.responses:
