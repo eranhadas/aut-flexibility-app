@@ -16,7 +16,9 @@ import streamlit as st
 
 LOGFILE = "responses.csv"          # local backup
 USE_SHEETS = True                  # set False to disable Google Sheets
-VERBOSE = st.sidebar.checkbox("Verbose logging")  # enable live debug
+#VERBOSE = st.sidebar.checkbox("Verbose logging")  # enable live debug
+VERBOSE = False  # Disable verbose UI logging
+
 
 # --------------------------------------------------------------------
 # Fixed column order – keep identical in Google Sheets and CSV
