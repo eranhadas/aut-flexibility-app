@@ -35,7 +35,7 @@ def show_responses(responses, disqualified):
     for i, r in enumerate(responses):
         col = cols[i % 3]  # round-robin across the columns
         use_text = r['use_text']
-        if use_text in disqualified:
+        if r.get("category") == "Disqualified":
             display_text = f"- {use_text} _(disqualified by AI)_"
         else:
             display_text = f"- {use_text}"
