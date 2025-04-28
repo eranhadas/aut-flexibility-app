@@ -8,7 +8,7 @@ import random
 # --- Required Imports ---
 # These modules are assumed to exist in your project structure
 from timer import start_timer, elapsed # Assumes functions for timing
-from llm_client import map_to_category, evaluate_responses # Assumes functions for LLM interaction
+from llm_client import map_to_category, evaluate_responses
 from feedback_engine import SessionState, PHASES, CATEGORY_LIST # Use components from your feedback_engine.py
 from logger import log # Assumes a logging function
 
@@ -302,3 +302,5 @@ else:
              st.warning("Waiting for phase to start...")
              time.sleep(1)
              st.rerun()
+
+        
