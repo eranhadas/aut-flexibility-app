@@ -145,12 +145,18 @@ else:
         if session.phase_start is None:
              session.start_phase()
 
-        # --- Setup hints only if entering phase 2 and if hints enabled ---
+        # --- Setup or reset hints depending on phase ---
         if session.phase_index == 1 and hint_enabled_for_group:
-            if "current_hints" not in st.session_state:
+            if st.session_state.get("hint_phase", -1) != 1:
+                # Phase 2 entered, and hints group → generate hints
                 st.session_state.current_hints = session.get_hint()
+                st.session_state.hint_phase = 1
         else:
-            st.session_state.current_hints = []  # No hints outside phase 2
+            if st.session_state.get("hint_phase", -1) != session.phase_index:
+                # Different phase entered → clear hints
+                st.session_state.current_hints = []
+                st.session_state.hint_phase = session.phase_index
+
             
 
         obj = session.current_object # Get object from SessionState property
@@ -169,7 +175,7 @@ else:
 
             
             # --- Hint Logic ---
-            hint_placeholder = st.empty()  # Create a dynamic placeholder
+            hint_placeholder = st.empty()
 
             hints = st.session_state.get("current_hints", [])
 
@@ -179,8 +185,9 @@ else:
                     for h in hints:
                         st.markdown(f"- {h}")
             else:
-                hint_placeholder.empty()  # Clear the placeholder if no hints
+                hint_placeholder.empty()
             # --- End Hint Logic ---
+
 
             submitted = st.form_submit_button("Submit use")
 
