@@ -97,12 +97,15 @@ if not st.session_state.started:
     st.write("You will be presented with objects one at a time and asked to list as many different uses as you can within the time limit.")
     st.write(f"Participant ID: `{participant or 'TEST'}`")
     st.write(f"Study ID: `{study_id or 'TEST'}`")
-    st.write("Please press Start when you are ready to begin.")
-    if st.button("Start"):
-        st.session_state.started = True
-        session.started = True
-        # session.start_phase() # Start phase 0
-        st.rerun()
+    st.title("AUT Flexibility Study")
+
+    if not st.session_state.started:
+        st.write("Please press Start when you are ready to begin.")
+        if st.button("Start"):
+            st.session_state.started = True
+            session.started = True
+            st.rerun()
+
 else:
     # --- Study Phases ---
 
