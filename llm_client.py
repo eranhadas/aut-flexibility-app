@@ -15,22 +15,31 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 def map_to_category(use_text: str, object_name: str, cats: str) -> str:
     """Return a single creativity category for one proposed use."""
     prompt = f"""
-    Given the object '{object_name}', given this proposed use: '{use_text}'.
+        You are a creativity evaluator. Your task is to strictly classify proposed uses of objects.
 
+        Given the object: '{object_name}'
+        Given the proposed use: '{use_text}'
 
-    1. Identify whether it is a disqualified respons – that is:
-       - Nonsensical or irrelevant
-       - Simply repeating the object name
-       - Not a possible use
+        Instructions:
+        1. Determine if the proposed use is disqualified. Disqualified means:
+           - Nonsensical or irrelevant to the object
+           - Simply repeating the object name
+           - Not a plausible or possible use
 
-    2. For the legitimate responses, assign it to the most fitting category
-       (e.g., 'construction', 'art', etc.).
-       
-    In case of a disqualified use, return just the word "Disqualified".
-    If no category is found return just the word "Uncategorized".
-    Otherwise, return only the category name.
+        2. If the use is disqualified, reply with exactly: Disqualified
+
+        3. If the use is legitimate but does not clearly fit any category, reply with exactly: Uncategorized
+
+        4. If the use is legitimate and fits a creativity category (such as 'construction', 'art', etc.), reply with exactly the best-fitting category name.
+
+        Important:
+        - Only reply with a single word or phrase: either 'Disqualified', 'Uncategorized', or a category name.
+        - Do not explain. Do not add any extra words.
+        - The reply must be exact and clean.
+
+        Now, what is your classification?
     """
-    
+
 
     try:
         resp = client.chat.completions.create(      # ← new call style
