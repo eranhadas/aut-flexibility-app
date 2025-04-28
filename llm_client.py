@@ -18,15 +18,18 @@ def map_to_category(use_text: str, object_name: str, cats: str) -> str:
         Given the object '{object_name}', given this proposed use: '{use_text}'.
 
 
-1. Identify whether it is a disqualified respons – that is:
-   - Nonsensical or irrelevant
-   - Simply repeating the object name
-   - Not a possible use
+    1. Identify whether it is a disqualified respons – that is:
+       - Nonsensical or irrelevant
+       - Simply repeating the object name
+       - Not a possible use
 
-2. For the legitimate responses, assign it to the most fitting category
-   (e.g., 'construction', 'art', etc.).
-   """
-    )
+    2. For the legitimate responses, assign it to the most fitting category
+       (e.g., 'construction', 'art', etc.).
+       
+    In case of disqualified or no category found return just the word "Uncategorized".
+    Otherwise, return only the category name.
+    """
+    
 
     try:
         resp = client.chat.completions.create(      # ← new call style
