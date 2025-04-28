@@ -25,7 +25,7 @@ return_url = params.get("return_url", default_return_url)
 # Every time you need to show / update the list:
 def show_responses(responses, disqualified):
     if not responses:
-        return  # do nothing if no responses
+        return  # Don't create anything
 
     with st.container():
         col1, col2, col3 = st.columns(3)
@@ -40,6 +40,7 @@ def show_responses(responses, disqualified):
                 display_text = f"- {use_text}"
 
             col.markdown(display_text)
+
 
 
 # --- Group Assignment ---
@@ -150,10 +151,6 @@ else:
         phase_info = session.current_phase # Get phase info from SessionState property
         duration = phase_info["duration_sec"]
 
-        # --- Clear responses when entering phase 3 ---
-        if session.phase_index == 2 and st.session_state.responses:
-            st.session_state.responses = []
-            st.session_state.disqualified = []
 
         st.header(f"{phase_info['name'].title()} – Object: {obj.capitalize()}")
         st.markdown(f"**Participant:** `{participant or 'TEST'}` | **Group:** `{group_id}` | **Phase:** `{session.phase_index + 1}/{len(PHASES)}`")
@@ -224,15 +221,10 @@ else:
                 
         # Only show 'Responses so far' if NOT in the last phase
         disqualified = st.session_state.get("disqualified", [])        
-        if st.session_state.responses and session.phase_index != 2:
-            st.subheader("Your recent responses for this object:")
-            responses_box = st.empty()
-            show_responses(st.session_state.responses, disqualified)
-        elif session.phase_index == 2 and st.session_state.responses:
-            # We are in phase 3 - fresh start
-            st.subheader("Your responses for the new object:")
-            responses_box = st.empty()
-            show_responses(st.session_state.responses, disqualified)
+        if st.session_state.responses:
+            st.subheader("Your responses so far:")
+            show_responses(st.session_state.responses, st.session_state.disqualified)
+
 
 
 
