@@ -193,7 +193,7 @@ else:
         duration = phase_info["duration_sec"]
 
 
-        st.header(f"{phase_info['name'].title()} – Object: {obj.capitalize()}")
+        st.header(f"{phase_info['name'].title()}: {obj.capitalize()}")
         st.markdown(f"**Participant:** `{participant or 'TEST'}` | **Group:** `{group_id}` | **Phase:** `{session.phase_index + 1}/{len(PHASES)}`")
 
         timer_placeholder = st.empty()
