@@ -307,7 +307,7 @@ else:
                 # --- Evaluate at phase end ---
                  if st.session_state.responses:
                     eval_result = evaluate_responses(session.current_object, st.session_state.responses)
-
+                    print(eval_result)
                     # Mark responses based on final batch disqualification
                     for r in st.session_state.responses:
                         if r["use_text"] in eval_result.get("disqualified", []):
