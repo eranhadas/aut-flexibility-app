@@ -1,17 +1,15 @@
 from timer import start_timer, elapsed
 
 PHASES = [
-    {"name": "First Round: Uses for Object", "duration_sec": 60},
+    {"name": "First Round: Uses for Object", "duration_sec": 120},
     {"name": "Keep Going: More Ideas for the Same Object", "duration_sec": 60},
-    {"name": "Final Round: Uses for a Different Object", "duration_sec": 60},
+    {"name": "Final Round: Uses for a Different Object", "duration_sec": 180},
 ]
 
 CATEGORY_LIST = {
     "brick": [
         "Building/Construction",
-        "Weapon/Defense",
-        "Paperweight",
-        "Doorstop",
+        "Weapon/Defense",        
         "Landscaping/Gardening",
         "Decoration",
         "Exercise/Weight",
@@ -34,9 +32,8 @@ CATEGORY_LIST = {
         "Reading/Writing",
         "Games/Entertainment",
         "Clothing",
-        "Sculpture",
-        "Dog Care",        
-        "Paper Plane"
+        "Sculpturing",
+        "Dog Care"        
 ]
 }
 
@@ -82,4 +79,3 @@ class SessionState:
             return []
         remaining = list(set(CATEGORY_LIST[self.current_object]) - self.used_categories)
         return remaining[:3]  # up to three suggestions
-
