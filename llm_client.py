@@ -1,4 +1,4 @@
-# aut-flexibility-app/llm_client.py  — version for openai‑python ≥ 1.0
+# aut-flexibility-app/llm_client.py  — version for openai python ≥ 1.0
 
 import os
 import json
@@ -26,13 +26,13 @@ def map_to_category(use_text: str, object_name: str, cats: str) -> str:
 
     Instructions:
     1. Determine if the proposed use is disqualified. Disqualified means:
-       - Nonsensical or irrelevant to the object
+       - Nonsensical or irrelevant to the object, mostly curse words or gibberish
        - Simply repeating the object name
-       - Not a plausible or possible use
+       - No one can imagine it as a use (use this very rarely).
 
     2. If the use is disqualified, reply with exactly: Disqualified
 
-    3. If the use is legitimate but does not clearly fit any category, reply with exactly: Uncategorized
+    3. If the use is legitimate but does not fit any category, which should not be so common, reply with exactly: Uncategorized.
 
     4. If the use is legitimate and fits a creativity category, choose exactly one best-fitting category from the list above and reply with the category name.
 
@@ -47,7 +47,7 @@ def map_to_category(use_text: str, object_name: str, cats: str) -> str:
 
     try:
         resp = client.chat.completions.create(      # ← new call style
-            model="gpt-3.5-turbo",
+            model="gpt-4.1-mini",
             messages=[
                 {
                     "role": "system",
@@ -77,9 +77,9 @@ def evaluate_responses(
 Given the object '{object_name}', you will be shown a list of proposed uses.
 
 1. Identify and return a list of any disqualified responses – those that are:
-   - Nonsensical or irrelevant
+   - Nonsensical or irrelevant to the object, mostly curse words or gibberish
    - Simply repeating the object name
-   - Not a possible use
+   - No one can imagine it as a use (use this very rarely).
 
 2. For the legitimate responses, assign each one to the most fitting category
    (e.g., 'construction', 'art', etc.).
@@ -95,7 +95,7 @@ Responses:
 
     try:
         resp = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4.1-mini",
             messages=[
                 {
                     "role": "system",
@@ -106,7 +106,8 @@ Responses:
                 },
                 {"role": "user", "content": prompt},
             ],
-            temperature=0.3,
+            temperature=0,
+            top_p=0
         )
         return json.loads(resp.choices[0].message.content)
     except Exception as e:
