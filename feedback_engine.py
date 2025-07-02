@@ -2,8 +2,8 @@ from timer import start_timer, elapsed
 
 PHASES = [
     {"name": "First Round: Uses for Object", "duration_sec": 120},
-    {"name": "Keep Going: More Ideas for the Same Object", "duration_sec": 60},
-    {"name": "Final Round: Uses for a Different Object", "duration_sec": 180},
+    {"name": "Keep Going: More Ideas for the Same Object", "duration_sec": 90},
+    {"name": "Final Round: Uses for a Different Object", "duration_sec": 210},
 ]
 
 CATEGORY_LIST = {
