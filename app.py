@@ -193,7 +193,8 @@ else:
         duration = phase_info["duration_sec"]
 
 
-        st.header(f"{phase_info['name'].title()}: {obj.capitalize()}")
+        st.subheader(f"{phase_info['name'].title()}: ")
+        st.subheader(f"{obj.upper()}")
         st.markdown(f"**Participant:** `{participant or 'TEST'}` | **Group:** `{group_id}` | **Phase:** `{session.phase_index + 1}/{len(PHASES)}`")
 
         timer_placeholder = st.empty()
@@ -246,8 +247,8 @@ else:
                     "object": obj
                 }
                 st.session_state.responses.append(full_record)
-
-                
+                st.success("✅ Response recorded.")
+                time.sleep(0.3) # Keep success message visible briefly                
                 # Log the response
                 log_data = {
                     "timestamp": datetime.utcnow().isoformat(),
@@ -266,8 +267,7 @@ else:
                 }
                 log(log_data) # Call your logging function
 
-                st.success("✅ Response recorded.")
-                time.sleep(0.5) # Keep success message visible briefly
+                
                 st.rerun() # Rerun to update timer and clear form
 
 
