@@ -10,6 +10,42 @@ CATEGORY_LIST = {
     "brick": [
         "Building/Construction",
         "Weapon/Defense",        
+        "Paperweight",
+        "Doorstop",
+        "Landscaping/Gardening",
+        "Decoration",
+        "Exercise/Weight",
+        "Furniture Support/Leveling",
+        "Cooking/Heating",
+        "Breaking/Smashing",
+        "Pathway/Walkway",
+        "Anchoring/Weighting Down",
+        "Toy/Play",
+        "Tool/Utility",
+        "Art Installation"
+],
+    "newspaper": [
+        "Insect Control",
+        "Art and Craft",
+        "Cleaning",
+        "Decorations",
+        "Wrapping/Packaging",
+        "Fire-related Use",
+        "Pet-related Use",
+        "Reading/Writing",
+        "Games/Entertainment",
+        "Clothing",
+        "Sculpturing",
+        "Dog Care",
+        "Origami",
+        "Paper Plane",
+        "Miscellaneous"        
+]
+
+SUGGESTION_LIST = {
+    "brick": [
+        "Building/Construction",
+        "Weapon/Defense",        
         "Landscaping/Gardening",
         "Decoration",
         "Exercise/Weight",
@@ -77,5 +113,5 @@ class SessionState:
     def get_hint(self):
         if not self.hints or self.phase_index != 1:
             return []
-        remaining = list(set(CATEGORY_LIST[self.current_object]) - self.used_categories)
+        remaining = list(set(SUGGESTION_LIST[self.current_object]) - self.used_categories)
         return remaining[:3]  # up to three suggestions
