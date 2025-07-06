@@ -194,7 +194,7 @@ else:
 
 
         st.subheader(f"{phase_info['name'].title()}: ")
-        st.subheader(f"{obj.upper()}")
+        st.header(f"★★★  {obj.upper()}  ★★★")
         st.markdown(f"**Participant:** `{participant or 'TEST'}` | **Group:** `{group_id}` | **Phase:** `{session.phase_index + 1}/{len(PHASES)}`")
 
         timer_placeholder = st.empty()
