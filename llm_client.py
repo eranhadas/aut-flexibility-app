@@ -47,7 +47,7 @@ def map_to_category(use_text: str, object_name: str, cats: str) -> str:
 
     try:
         resp = client.chat.completions.create(      # ← new call style
-            model="gpt-4.1-nano",
+            model="gpt-4.1-mini",
             messages=[
                 {
                     "role": "system",
@@ -58,7 +58,8 @@ def map_to_category(use_text: str, object_name: str, cats: str) -> str:
                 },
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=20,
+            temperature=0,
+            top_p=0
         )
         return resp.choices[0].message.content.strip()
     except Exception:
@@ -79,7 +80,9 @@ Given the object '{object_name}', you will be shown a list of proposed uses.
 1. Identify and return a list of any disqualified responses – those that are:
    - Nonsensical or irrelevant to the object, mostly curse words or gibberish
    - Simply repeating the object name
-   - No one can imagine it as a use (use this very rarely).
+   - No one can imagine it as a use (use this very rarely). 
+   Be as flexible as possible and don't rush to disqualify, unless it's gibberish
+   or complete nonsense. For example, using a brick to keep heat is legitimate.
 
 2. For the legitimate responses, assign each one to the most fitting category
    (e.g., 'construction', 'art', etc.).
@@ -95,7 +98,7 @@ Responses:
 
     try:
         resp = client.chat.completions.create(
-            model="gpt-4.1-nano",
+            model="gpt-4.1-mini",
             messages=[
                 {
                     "role": "system",
