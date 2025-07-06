@@ -47,7 +47,7 @@ def map_to_category(use_text: str, object_name: str, cats: str) -> str:
 
     try:
         resp = client.chat.completions.create(      # ← new call style
-            model="gpt-4.1-mini",
+            model="gpt-4.1-nano",
             messages=[
                 {
                     "role": "system",
@@ -95,7 +95,7 @@ Responses:
 
     try:
         resp = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="gpt-4.1-nano",
             messages=[
                 {
                     "role": "system",
