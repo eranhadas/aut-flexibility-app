@@ -211,7 +211,7 @@ else:
 
             if hints:
                 with hint_placeholder.container():
-                    st.markdown("**Hint: You could try a use related to:**")
+                    st.markdown("**Hint: You could try a use related to the following categories <br>(but it is forbidden to use the category names) :**")
                     for h in hints:
                         st.markdown(f"- {h}")
             else:
