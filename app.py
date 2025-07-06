@@ -24,7 +24,12 @@ default_return_url = "https://app.prolific.com/submissions/complete?cc=YOUR_CODE
 return_url = params.get("return_url", default_return_url)
 
 # ── 1.  Background executor lives for the whole app ───────────────────────
-@st.experimental_singleton(show_spinner=False)
+# Pick the best decorator available
+singleton = getattr(st, "singleton",
+            getattr(st, "experimental_singleton",
+                    lambda **kw: (lambda f: f)))   # no-op fallback
+
+@singleton(show_spinner=False)
 def get_log_executor() -> ThreadPoolExecutor:
     return ThreadPoolExecutor(max_workers=1, thread_name_prefix="logger")
 
