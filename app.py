@@ -17,8 +17,8 @@ from logger import log # Assumes a logging function
 
 # --- Get Prolific query params ---
 params = st.query_params
-participant = params.get("participant_id", "")
-study_id = params.get("study_id", "")
+participant = params.get("PROLIFIC_PID", "")
+study_id = params.get("STUDY_ID", "")
 # Provide a default Prolific URL for testing, use actual one if present
 default_return_url = "https://app.prolific.com/submissions/complete?cc=YOUR_CODE"
 return_url = params.get("return_url", default_return_url)
