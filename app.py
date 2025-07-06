@@ -1,9 +1,12 @@
 # aut-flexibility-app/app.py
 
+import sys 
 import streamlit as st
 import time
 from datetime import datetime
 import random
+from concurrent.futures import ThreadPoolExecutor
+
 
 # --- Required Imports ---
 # These modules are assumed to exist in your project structure
@@ -20,6 +23,25 @@ study_id = params.get("study_id", "")
 default_return_url = "https://app.prolific.com/submissions/complete?cc=YOUR_CODE"
 return_url = params.get("return_url", default_return_url)
 
+# ── 1.  Background executor lives for the whole app ───────────────────────
+@st.singleton(show_spinner=False)          # use st.singleton if available
+def get_log_executor() -> ThreadPoolExecutor:
+    return ThreadPoolExecutor(max_workers=1, thread_name_prefix="logger")
+
+
+log_executor = get_log_executor()
+
+def async_log(data: dict):
+    """Queue logging on the executor so UI can refresh immediately."""
+    def _safe_log(d):
+        try:
+            log(d)
+        except Exception:
+            import traceback
+            traceback.print_exc(file=sys.stderr)
+
+    log_executor.submit(_safe_log, data)
+# ───────────────────────────────────────────────────────────────────────────
 
 def simple_levenshtein(s1, s2):
     """Compute a simple Levenshtein distance between two strings."""
@@ -107,7 +129,8 @@ if "responses" not in st.session_state:
 # Ensure disqualified list exists
 if "disqualified" not in st.session_state:
     st.session_state.disqualified = []
-
+if "pending_futures" not in st.session_state:
+    st.session_state.pending_futures = []
 
 # --- App Flow ---
 
@@ -154,6 +177,12 @@ else:
         </a>
         """, unsafe_allow_html=True)
         st.markdown(f"Or copy this code: `{completion_code}`")
+        for fut in st.session_state.pending_futures:
+        try:
+            fut.result(timeout=5)   # 5 s should be plenty
+        except Exception:
+            pass                    # already printed inside _safe_log
+            
         st.stop() # Stop script execution after completion
 
     # Check for recess mode
@@ -265,8 +294,10 @@ else:
                     "hints_enabled_group": hint_enabled_for_group,
                     "shown_hints": hints # Log the hints that were actually shown
                 }
-                log(log_data) # Call your logging function
-
+                #log(log_data) # Call your logging function
+                # **Non-blocking** logging
+                future = async_log(log_data)
+                st.session_state.pending_futures.append(future)   # optional
                 
                 st.rerun() # Rerun to update timer and clear form
 
