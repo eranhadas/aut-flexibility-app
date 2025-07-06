@@ -178,10 +178,10 @@ else:
         """, unsafe_allow_html=True)
         st.markdown(f"Or copy this code: `{completion_code}`")
         for fut in st.session_state.pending_futures:
-        try:
-            fut.result(timeout=5)   # 5 s should be plenty
-        except Exception:
-            pass                    # already printed inside _safe_log
+            try:
+                fut.result(timeout=5)   # 5 s should be plenty
+            except Exception:
+                pass                    # already printed inside _safe_log
             
         st.stop() # Stop script execution after completion
 
