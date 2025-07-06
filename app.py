@@ -82,7 +82,7 @@ def show_responses(responses, disqualified):
         col = cols[i % num_cols]
         use_text = r['use_text']
         if r.get("category") == "Disqualified":
-            display_text = f"- {use_text} _(disqualified by AI)_"
+            display_text = f"- {use_text} _(flagged for review)_"
         else:
             display_text = f"- {use_text}"
 
