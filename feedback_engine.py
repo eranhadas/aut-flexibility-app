@@ -41,6 +41,7 @@ CATEGORY_LIST = {
         "Paper Plane",
         "Miscellaneous"        
 ]
+}
 
 SUGGESTION_LIST = {
     "brick": [
