@@ -282,7 +282,7 @@ else:
                 }
                 st.session_state.responses.append(full_record)
                 st.success("✅ Response recorded.")
-                time.sleep(0.3) # Keep success message visible briefly                
+                time.sleep(0.5) # Keep success message visible briefly                
                 # Log the response
                 log_data = {
                     "timestamp": datetime.utcnow().isoformat(),
