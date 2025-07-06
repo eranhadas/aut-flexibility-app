@@ -167,6 +167,14 @@ else:
     if session.phase_index >= len(PHASES):
         st.success("🎉 You have completed the study!")
         st.balloons()
+        
+        # show answers straight away
+        st.subheader("Your responses in this last phase:")
+        show_responses(st.session_state.responses,
+                       st.session_state.disqualified)
+
+        # keep them on screen for ~10 s (blocking but simple)
+        time.sleep(5)
         # Provide a clickable link to return to Prolific
         completion_code = "C6KNGZWE" # Replace with your actual Prolific completion code
         prolific_url = f"{return_url}?cc={completion_code}" if return_url != default_return_url else f"https://app.prolific.com/submissions/complete?cc={completion_code}"
