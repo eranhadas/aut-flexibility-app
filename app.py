@@ -201,9 +201,9 @@ else:
     # Check for recess mode
     elif st.session_state.recess_mode:
         st.header("🧘 Take a short break")
-        st.write("You can rest for 30 seconds. The next phase will start automatically.")
+        st.write("You can rest for 20 seconds. The next phase will start automatically.")
         countdown = st.empty()
-        recess_duration = 30 # Standard 30 second break
+        recess_duration = 20 # Standard 30 second break
         for i in range(recess_duration, 0, -1):
             countdown.markdown(f"⏳ Resuming in **{i}** seconds...")
             time.sleep(1)
