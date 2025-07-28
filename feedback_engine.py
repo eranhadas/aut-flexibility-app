@@ -6,11 +6,10 @@ PHASES = [
     {"name": "Keep Going: More Ideas for the Same Object", "duration_sec": 80},
     {"name": "Final Round: Uses for a Different Object", "duration_sec": 140},
 ]
-
 CATEGORY_LIST = {
     "brick": [
         "Building/Construction",
-        "Weapon/Defense",        
+        "Weapon/Defense",
         "Paperweight",
         "Doorstop",
         "Landscaping/Gardening",
@@ -24,7 +23,7 @@ CATEGORY_LIST = {
         "Toy/Play",
         "Tool/Utility",
         "Art Installation"
-],
+    ],
     "newspaper": [
         "Insect Control",
         "Art and Craft",
@@ -40,14 +39,14 @@ CATEGORY_LIST = {
         "Dog Care",
         "Origami",
         "Paper Plane",
-        "Miscellaneous"        
-]
+        "Miscellaneous"
+    ]
 }
 
 SUGGESTION_LIST = {
     "brick": [
         "Building/Construction",
-        "Weapon/Defense",        
+        "Weapon/Defense",
         "Landscaping/Gardening",
         "Decoration",
         "Exercise/Weight",
@@ -58,7 +57,7 @@ SUGGESTION_LIST = {
         "Anchoring/Weighting Down",
         "Toy/Play",
         "Art Installation"
-],
+    ],
     "newspaper": [
         "Insect Control",
         "Art and Craft",
@@ -71,9 +70,10 @@ SUGGESTION_LIST = {
         "Games/Entertainment",
         "Clothing",
         "Sculpturing",
-        "Dog Care"        
-]
+        "Dog Care"
+    ]
 }
+
 
 class SessionState:
     def __init__(self, objects, hints=True):
@@ -100,9 +100,8 @@ class SessionState:
     def next_phase(self):
         self.phase_index += 1
 
-    def normalize(cat: str) -> str:
-    return cat.strip().lower() if isinstance(cat, str) else ""
-
+    def normalize(self, cat):
+        return cat.strip().lower() if isinstance(cat, str) else ""
 
     def record_use(self, use_text):
         from llm_client import map_to_category
@@ -110,9 +109,9 @@ class SessionState:
         self.used_categories.add(category)
         norm_cat = normalize(category)
         if norm_cat and norm_cat != "disqualified":
-            self.used_categories.add(norm_cat)            
+            self.used_categories.add(norm_cat)
             self.trial_count += 1
-            
+
         return {
             "trial": self.trial_count,
             "use_text": use_text,
@@ -126,7 +125,7 @@ class SessionState:
             return []
         remaining = [
             c for c in SUGGESTION_LIST[self.current_object]
-            if normalize(c) not in self.used_categories
+            if self.normalize(c) not in self.used_categories
         ]
-        
+
         return random.sample(remaining, min(3, len(remaining)))
