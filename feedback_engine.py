@@ -100,11 +100,19 @@ class SessionState:
     def next_phase(self):
         self.phase_index += 1
 
+    def normalize(cat: str) -> str:
+    return cat.strip().lower() if isinstance(cat, str) else ""
+
+
     def record_use(self, use_text):
         from llm_client import map_to_category
         category = map_to_category(use_text, self.current_object, str(CATEGORY_LIST))
         self.used_categories.add(category)
-        self.trial_count += 1
+        norm_cat = normalize(category)
+        if norm_cat and norm_cat != "disqualified":
+            self.used_categories.add(norm_cat)            
+            self.trial_count += 1
+            
         return {
             "trial": self.trial_count,
             "use_text": use_text,
@@ -113,8 +121,12 @@ class SessionState:
         }
 
     def get_hint(self):
+        print("Used categories:", self.used_categories)
         if not self.hints or self.phase_index != 1:
             return []
-        remaining = list(set(SUGGESTION_LIST[self.current_object]) - self.used_categories)
-        #return remaining[:3]  # up to three suggestions
+        remaining = [
+            c for c in SUGGESTION_LIST[self.current_object]
+            if normalize(c) not in self.used_categories
+        ]
+        
         return random.sample(remaining, min(3, len(remaining)))
