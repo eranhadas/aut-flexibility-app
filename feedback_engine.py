@@ -1,4 +1,6 @@
 import random
+import streamlit as st
+
 from timer import start_timer, elapsed
 
 PHASES = [
