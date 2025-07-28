@@ -115,4 +115,5 @@ class SessionState:
         if not self.hints or self.phase_index != 1:
             return []
         remaining = list(set(SUGGESTION_LIST[self.current_object]) - self.used_categories)
-        return remaining[:3]  # up to three suggestions
+        #return remaining[:3]  # up to three suggestions
+        return random.sample(remaining, min(3, len(remaining)))
