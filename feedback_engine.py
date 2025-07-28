@@ -108,7 +108,7 @@ class SessionState:
     def record_use(self, use_text):
         from llm_client import map_to_category
         category = map_to_category(use_text, self.current_object, str(CATEGORY_LIST))
-        norm_cat = normalize(category)
+        norm_cat = self.normalize(category)
     
         # Debug log
         import streamlit as st
