@@ -1,4 +1,4 @@
-from random import sample
+import random
 from timer import start_timer, elapsed
 
 PHASES = [
