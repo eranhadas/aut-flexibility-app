@@ -97,7 +97,9 @@ class SessionState:
 
     def start_phase(self):
         self.phase_start = start_timer()
-        self.used_categories = set()
+        # Clear used_categories only at start of Phase 0 or Phase 2
+        if self.phase_index in [0, 2]:
+            self.used_categories = set()
 
     def next_phase(self):
         self.phase_index += 1
