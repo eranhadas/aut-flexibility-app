@@ -120,7 +120,10 @@ class SessionState:
         }
 
     def get_hint(self):
-        print("Used categories:", self.used_categories)
+        st.write("Used categories (normalized):", self.used_categories)
+        st.write("Suggestions (raw):", SUGGESTION_LIST[self.current_object])
+        st.write("Remaining hints:", remaining)
+
         if not self.hints or self.phase_index != 1:
             return []
         remaining = [
