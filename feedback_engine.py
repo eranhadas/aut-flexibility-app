@@ -114,12 +114,12 @@ class SessionState:
     
         # Debug log
         import streamlit as st
-        st.write(f"🧪 Original category: {category!r}")
-        st.write(f"🧪 Normalized category: {norm_cat!r}")
+        #st.write(f"🧪 Original category: {category!r}")
+        #st.write(f"🧪 Normalized category: {norm_cat!r}")
     
         if norm_cat and norm_cat != "disqualified":
             self.used_categories.add(norm_cat)
-            st.write(f"✅ Added to used_categories: {norm_cat}")
+            #st.write(f"✅ Added to used_categories: {norm_cat}")
     
         self.trial_count += 1
         return {
@@ -131,8 +131,8 @@ class SessionState:
 
 
     def get_hint(self):
-        st.write("Used categories (normalized):", self.used_categories)
-        st.write("Suggestions (raw):", SUGGESTION_LIST[self.current_object])
+        #st.write("Used categories (normalized):", self.used_categories)
+        #st.write("Suggestions (raw):", SUGGESTION_LIST[self.current_object])
        
 
         if not self.hints or self.phase_index != 1:
@@ -142,5 +142,5 @@ class SessionState:
             if self.normalize(c) not in self.used_categories
         ]
 
-        st.write("Remaining hints:", remaining)
+        #st.write("Remaining hints:", remaining)
         return random.sample(remaining, min(3, len(remaining)))
