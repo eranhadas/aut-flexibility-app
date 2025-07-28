@@ -107,7 +107,7 @@ class SessionState:
         from llm_client import map_to_category
         category = map_to_category(use_text, self.current_object, str(CATEGORY_LIST))
         self.used_categories.add(category)
-        norm_cat = normalize(category)
+        norm_cat = self.normalize(category)
         if norm_cat and norm_cat != "disqualified":
             self.used_categories.add(norm_cat)
             self.trial_count += 1
