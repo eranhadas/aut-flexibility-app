@@ -100,6 +100,12 @@ if "group_id" not in st.session_state:
     except Exception: # Fallback if hashing fails
          st.session_state.group_id = random.randint(0, 3)
 
+if st.session_state.group_id = 1:
+            st.session_state.group_id = 0
+
+if st.session_state.group_id = 3:
+            st.session_state.group_id = 2
+
 
 group_id = st.session_state.group_id
 
