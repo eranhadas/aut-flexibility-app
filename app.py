@@ -153,22 +153,17 @@ if not st.session_state.started:
     st.write(f"Participant ID: `{participant or 'TEST'}`")
     st.write(f"Study ID: `{study_id or 'TEST'}`")
 
-    st.expander("""
-    **Before we begin, please confirm:**
+    st.subheader("Before we begin, please confirm:")
 
-- I understand my responses and response times will be collected.
-- My Prolific ID is used only for payment and will be stored separately from my responses.
-- Data will be used for research in anonymized/aggregate form and may be shared as anonymized datasets.
-- **Data storage and retention:** Data are stored securely on institutional or approved cloud servers and
-retained for up to **10 years**.
-- **No sensitive data:** This study does not collect special-category data 
-(e.g., race/ethnicity, religious or political beliefs, or health data).
-- **Withdrawal:** I may stop at any time by returning the study on Prolific, 
-and I may request deletion of my submitted data later by emailing the researcher with my Prolific ID.
-- **Purpose of data use**: This study is conducted for **academic research purposes only**. 
-Data will not be used for marketing or commercial purposes.  
-- **Legal framework**: Your data are handled in accordance with the UK GDPR / EU GDPR and the research ethics policies of Tel Aviv University.
-    """)
+    st.write("- I understand my responses and response times will be collected.")
+    st.write("- My Prolific ID is used only for payment and will be stored separately from my responses.")
+    st.write("- Data will be used for research in anonymized/aggregate form and may be shared as anonymized datasets.")
+    st.write("- **Data storage and retention:** Data are stored securely on institutional or approved cloud servers and retained for up to **10 years**.")
+    st.write("- **No sensitive data:** This study does not collect special-category data (e.g., race/ethnicity, religious or political beliefs, or health data).")
+    st.write("- **Withdrawal:** I may stop at any time by returning the study on Prolific, and I may request deletion of my submitted data later by emailing the researcher with my Prolific ID.")
+    st.write("- **Purpose of data use:** This study is conducted for **academic research purposes only**. Data will not be used for marketing or commercial purposes.")
+    st.write("- **Legal framework:** Your data are handled in accordance with the UK GDPR / EU GDPR and the research ethics policies of Tel Aviv University.")
+
 
     consent_agreed = st.checkbox("I have read and consent to participate.")
 
@@ -440,6 +435,7 @@ else:
              st.warning("Waiting for phase to start...")
              time.sleep(1)
              st.rerun()
+
 
 
 
