@@ -152,14 +152,26 @@ if not st.session_state.started:
     st.write("You will be presented with objects one at a time and asked to list as many different uses as you can within the time limit.")
     st.write(f"Participant ID: `{participant or 'TEST'}`")
     st.write(f"Study ID: `{study_id or 'TEST'}`")
-    
+
+    st.markdown("""
+    **Before we begin, please confirm:**
+
+    - I understand my responses and response times will be collected.
+    - My Prolific ID is used only for payment and will be stored separately.
+    - Data will be used for research in anonymized/aggregate form and may be shared as anonymized datasets.
+    - Participation is voluntary and I may withdraw anytime by returning the study on Prolific.
+    - Data are handled under GDPR and my institution’s ethics policies.
+    """)
+
+    consent_agreed = st.checkbox("I have read and consent to participate.")
+
 
     start_placeholder = st.empty()
 
     if not st.session_state.started:
         with start_placeholder.container():
             st.write("Please press Start when you are ready to begin.")
-            if st.button("Start"):
+            if st.button("Start", disabled=not consent_agreed):
                 st.session_state.started = True
                 session.started = True
                 start_placeholder.empty()
@@ -421,3 +433,4 @@ else:
              st.warning("Waiting for phase to start...")
              time.sleep(1)
              st.rerun()
+
